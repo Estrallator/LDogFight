@@ -1,0 +1,87 @@
+
+// IMPORTANTE:: Led infrarrojo conectado a pin 3
+
+#include <IRremote.h>
+
+#define RECV_PIN  2
+#define TRIGGER 9
+
+IRrecv irrecv(RECV_PIN);
+IRsend irsend;
+
+decode_results results;
+
+
+
+void setup()
+{
+
+  pinMode(TRIGGER, INPUT_PULLUP);
+  
+  Serial.begin(9600);
+  Serial.println("Listo");
+  irrecv.enableIRIn(); // Empezamos la recepción  por IR
+}
+
+
+unsigned long dump(decode_results *results) {
+  // Dumps out the decode_results structure.
+  // Call this after IRrecv::decode()
+  
+  Serial.print("(");
+  Serial.print(results->bits, DEC);
+  Serial.print(" bits)");
+  
+  if (results->decode_type == UNKNOWN) {
+    Serial.print("Unknown encoding: ");
+  }
+  else if (results->decode_type == NEC) {
+    if (results->value != REPEAT){
+    Serial.print("Datos recibidos: ");
+    Serial.println(results->value);
+    return results->value;
+    }
+  }
+
+  Serial.print(results->value, HEX);
+  Serial.print(" (HEX) , ");
+  Serial.print(results->value, BIN);
+  Serial.println(" (BIN)");
+
+  return 0;
+
+  
+
+}
+
+void tocado(){
+  
+}
+
+void disparo(){
+  
+}
+
+void loop() {
+  unsigned long data;
+  data=0;
+  if (irrecv.decode(&results)) {
+    data=dump(&results); 
+    irrecv.resume(); // empezamos una nueva recepción
+  }
+  /*if(results->value==)
+  {
+    }
+  */
+  if(data==1){
+    Serial.println("HIT");
+    tocado();
+  }
+  
+  if(!digitalRead(TRIGGER)){
+    Serial.println("Disparo");
+    disparo();
+    irsend.sendNEC(1, 32);
+  }
+  delay(50);
+}
