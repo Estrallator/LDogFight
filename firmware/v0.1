@@ -4,7 +4,9 @@
 #include <IRremote.h>
 
 #define RECV_PIN  2
+#define LED_CALIBRACION 5
 #define TRIGGER 9
+#define RCV 4
 
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;
@@ -17,6 +19,8 @@ void setup()
 {
 
   pinMode(TRIGGER, INPUT_PULLUP);
+  pinMode(RCV, INPUT);
+  pinMode(LED_CALIBRACION,OUTPUT);
   
   Serial.begin(9600);
   Serial.println("Listo");
@@ -25,7 +29,7 @@ void setup()
 
 
 unsigned long dump(decode_results *results) {
-  // Dumps out the decode_results structure.
+  
   // Call this after IRrecv::decode()
   
   Serial.print("(");
@@ -48,7 +52,7 @@ unsigned long dump(decode_results *results) {
   Serial.print(results->value, BIN);
   Serial.println(" (BIN)");
 
-  return 0;
+  return -1;
 
   
 
@@ -62,9 +66,22 @@ void disparo(){
   
 }
 
+void calibracion(){
+  analogWrite(LED_CALIBRACION,180);
+  delay(200);
+  while(digitalRead(TRIGGER))
+  {
+  }
+  digitalWrite(LED_CALIBRACION,LOW);
+  delay(200);
+}
+
 void loop() {
   unsigned long data;
+  int ch_trg;
+  
   data=0;
+  
   if (irrecv.decode(&results)) {
     data=dump(&results); 
     irrecv.resume(); // empezamos una nueva recepción
@@ -78,10 +95,15 @@ void loop() {
     tocado();
   }
   
-  if(!digitalRead(TRIGGER)){
+  if(pulseIn(RCV, HIGH, 25000) > 10000)
+  {
     Serial.println("Disparo");
     disparo();
     irsend.sendNEC(1, 32);
+  } 
+  if(!digitalRead(TRIGGER)){
+    Serial.println("Modo calibracion");
+    calibracion();
   }
   delay(50);
 }
