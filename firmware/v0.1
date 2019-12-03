@@ -13,6 +13,8 @@ IRsend irsend;
 
 decode_results results;
 
+int salud=100;
+
 
 
 void setup()
@@ -59,6 +61,20 @@ unsigned long dump(decode_results *results) {
 }
 
 void tocado(){
+
+  salud -=random(1, 20);
+  if(salud <=0)
+    derribado();
+
+}
+
+void derribado()
+{
+  Serial.println("Derribado");
+  
+  while(1){
+    
+  }
   
 }
 
@@ -71,6 +87,7 @@ void calibracion(){
   delay(200);
   while(digitalRead(TRIGGER))
   {
+    irsend.sendNEC(1, 32);
   }
   digitalWrite(LED_CALIBRACION,LOW);
   delay(200);
