@@ -1,12 +1,18 @@
 
-// IMPORTANTE:: Led infrarrojo conectado a pin 3
 
+// IMPORTANTE:: Led infrarrojo conectado a pin 3
+/* Definicion de PINES de los diferentes componentes. No cambiar si no se está seguro de las modificaciones */
 #include <IRremote.h>
 
 #define RECV_PIN  2
-#define LED_CALIBRACION 5
-#define TRIGGER 9
 #define RCV 4
+#define LED_CALIBRACION 5
+#define BUZZ 6
+#define LEDS 7
+#define TRIGGER 9
+
+#define VER 0.2
+
 
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;
@@ -25,7 +31,8 @@ void setup()
   pinMode(LED_CALIBRACION,OUTPUT);
   
   Serial.begin(9600);
-  Serial.println("Listo");
+  Serial.print("Laser Dog Fight - ver:");
+  Serial.print(VER);
   irrecv.enableIRIn(); // Empezamos la recepción  por IR
 }
 
@@ -55,30 +62,41 @@ unsigned long dump(decode_results *results) {
   Serial.println(" (BIN)");
 
   return -1;
-
-  
-
 }
 
-void tocado(){
-
-  salud -=random(1, 20);
-  if(salud <=0)
+void tocado(){                        // Función de daños en la aeronave
+  salud -=random(1, 20);              // Se realiza un daño aleatorio de entre 1 y 20 uds.
+  if(salud <=0)               
     derribado();
-
 }
 
-void derribado()
+
+void derribado()                      //Funcion a ejecutar cuando eres derribado
 {
-  Serial.println("Derribado");
+  int timer=millis();
+  timer +=4000
   
-  while(1){
-    
+  Serial.println("Derribado");        //Se emiten flashes y pitidos durante 4 segundos
+  while(timer-millis()>0){
+    digitalWrite(LEDS,HIGH);
+    digitalWrite(BUZZ,HIGH);
+    delay(150);
+    digitalWrite(LEDS,LOW);
+    digitalWrite(BUZZ,LOW);
+    delay(150);
+
+  }
+  
+  while(1){                          //Despues de 4 segundos cesa el pitido y se deja sólo luz intermitente
+   digitalWrite(LEDS,HIGH);
+   delay(400);
+   digitalWrite(LEDS,LOW);
+   delay(400);
   }
   
 }
 
-void disparo(){
+void disparo(){                     // Función a ejecutar cuando se dispara
   
 }
 
@@ -88,6 +106,7 @@ void calibracion(){
   while(digitalRead(TRIGGER))
   {
     irsend.sendNEC(1, 32);
+    delay(50);
   }
   digitalWrite(LED_CALIBRACION,LOW);
   delay(200);
@@ -108,7 +127,7 @@ void loop() {
     }
   */
   if(data==1){
-    Serial.println("HIT");
+    Serial.println("HIT");   //debug
     tocado();
   }
   
