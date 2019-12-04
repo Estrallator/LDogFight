@@ -4,14 +4,18 @@
 /* Definicion de PINES de los diferentes componentes. No cambiar si no se está seguro de las modificaciones */
 #include <IRremote.h>
 
-#define RECV_PIN  2
-#define RCV 4
-#define LED_CALIBRACION 5
-#define BUZZ 6
-#define LEDS 7
-#define TRIGGER 9
+#define RECV_PIN  2   //Pin donde se reciben datos del sensor IR
+#define RCV 4         // Pin conectado al Receptor de la aeronave
 
-#define VER 0.2
+#define LED_CALIBRACION 5 // Posibilidad de incluir un led de luz visible para realizar la colimación del laser IR
+#define BUZZ 6            //Zumbador
+
+#define LED_R 7       //Leds de status
+#define LED_G 8
+
+#define TRIGGER 9     // Gatillo de test manual
+
+#define VER 0.2       // Version actual
 
 
 IRrecv irrecv(RECV_PIN);
@@ -100,6 +104,10 @@ void disparo(){                     // Función a ejecutar cuando se dispara
   
 }
 
+void statusFlash(){                 // Flash de estado de salud de la aeronave.
+  
+}
+
 void calibracion(){
   analogWrite(LED_CALIBRACION,180);
   delay(200);
@@ -141,5 +149,7 @@ void loop() {
     Serial.println("Modo calibracion");
     calibracion();
   }
+
+  statusFlash();
   delay(50);
 }
