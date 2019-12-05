@@ -6,25 +6,20 @@
 
 #define RECV_PIN  2   //Pin donde se reciben datos del sensor IR
 #define RCV 4         // Pin conectado al Receptor de la aeronave
-
 #define LED_CALIBRACION 5 // Posibilidad de incluir un led de luz visible para realizar la colimación del laser IR
 #define BUZZ 6            //Zumbador
-
 #define LED_R 7       //Leds de status
 #define LED_G 8
-
 #define TRIGGER 9     // Gatillo de test manual
 
-#define VER 0.2       // Version actual
-
+#define VER 0.9       // Version actual
 
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;
-
 decode_results results;
 
-int salud=100;
-
+int salud=100; 
+int globalTimer = millis(); //reloj para realizar calculos en ciertas funciones
 
 
 void setup()
@@ -70,32 +65,38 @@ unsigned long dump(decode_results *results) {
 
 void tocado(){                        // Función de daños en la aeronave
   salud -=random(1, 20);              // Se realiza un daño aleatorio de entre 1 y 20 uds.
+  
+  digitalWrite(LED_R,HIGH);           //Flash + pitido
+  digitalWrite(BUZZ,HIGH);
+  delay(100);
+  digitalWrite(LED_R,LOW);
+  digitalWrite(BUZZ,LOW);
+  
   if(salud <=0)               
     derribado();
 }
 
 
-void derribado()                      //Funcion a ejecutar cuando eres derribado
+void derribado()                      //Funcion a ejecutar cuando eres derribado. Una vez llamado a esta funcion, se entra en bucle infinito.
 {
   int timer=millis();
-  timer +=4000
+  timer +=4000;
   
   Serial.println("Derribado");        //Se emiten flashes y pitidos durante 4 segundos
   while(timer-millis()>0){
-    digitalWrite(LEDS,HIGH);
+    digitalWrite(LED_R,HIGH);
     digitalWrite(BUZZ,HIGH);
     delay(150);
-    digitalWrite(LEDS,LOW);
+    digitalWrite(LED_R,LOW);
     digitalWrite(BUZZ,LOW);
     delay(150);
-
   }
   
   while(1){                          //Despues de 4 segundos cesa el pitido y se deja sólo luz intermitente
-   digitalWrite(LEDS,HIGH);
-   delay(400);
-   digitalWrite(LEDS,LOW);
-   delay(400);
+   digitalWrite(LED_R,HIGH);
+   delay(500);
+   digitalWrite(LED_R,LOW);
+   delay(500);
   }
   
 }
@@ -104,7 +105,28 @@ void disparo(){                     // Función a ejecutar cuando se dispara
   
 }
 
-void statusFlash(){                 // Flash de estado de salud de la aeronave.
+void statusFlash(){                 // Flash de estado de salud de la aeronave. y delays entre bucles
+ 
+  if (salud>=90){
+    digitalWrite(LED_G,HIGH);
+    delay(30);
+    digitalWrite(LED_G,LOW);
+    delay(30);
+    digitalWrite(LED_G,HIGH);
+    delay(30);
+    digitalWrite(LED_G,LOW);
+  }
+  else if(salud >=50){
+    digitalWrite(LED_G,HIGH);
+    delay(50);
+    digitalWrite(LED_G,LOW);
+  }
+  else{
+    digitalWrite(LED_G,HIGH);
+    delay(50);
+    digitalWrite(LED_G,LOW);
+  }
+  
   
 }
 
@@ -149,7 +171,6 @@ void loop() {
     Serial.println("Modo calibracion");
     calibracion();
   }
-
-  statusFlash();
-  delay(50);
+  
+  statusFlash();            //añade flashes de status. TAMBIEN INCLUYE LOS DELAY ENTRE BUCLES, NECESARIOS.
 }
