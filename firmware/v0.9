@@ -161,7 +161,7 @@ void loop() {
     tocado();
   }
   
-  if(pulseIn(RCV, HIGH, 25000) > 10000)
+  if(pulseIn(RCV, HIGH, 2500) > 1000)
   {
     Serial.println("Disparo");
     disparo();
