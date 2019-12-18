@@ -19,7 +19,7 @@ IRsend irsend;
 decode_results results;
 
 int salud=100; 
-int globalTimer = millis(); //reloj para realizar calculos en ciertas funciones
+int globalTimer = abs(millis()/1000); //reloj para realizar calculos en ciertas funciones
 
 
 void setup()
@@ -74,6 +74,8 @@ void tocado(){                        // Función de daños en la aeronave
   
   if(salud <=0)               
     derribado();
+
+  delay(500);                       // delay de pausa cuando te alcanzan, ayuda a no hacer un derribo de una sola rafaga, a demás inhabilita el disparo durante este tiempo
 }
 
 
@@ -106,8 +108,9 @@ void disparo(){                     // Función a ejecutar cuando se dispara
 }
 
 void statusFlash(){                 // Flash de estado de salud de la aeronave. y delays entre bucles
- 
+  
   if (salud>=90){
+    Serial.println("flash status: good");
     digitalWrite(LED_G,HIGH);
     delay(30);
     digitalWrite(LED_G,LOW);
@@ -115,13 +118,16 @@ void statusFlash(){                 // Flash de estado de salud de la aeronave. 
     digitalWrite(LED_G,HIGH);
     delay(30);
     digitalWrite(LED_G,LOW);
+
   }
   else if(salud >=50){
+    Serial.println("flash status: medium");
     digitalWrite(LED_G,HIGH);
     delay(50);
     digitalWrite(LED_G,LOW);
   }
   else{
+    Serial.println("flash status: low");
     digitalWrite(LED_G,HIGH);
     delay(50);
     digitalWrite(LED_G,LOW);
@@ -161,7 +167,7 @@ void loop() {
     tocado();
   }
   
-  if(pulseIn(RCV, HIGH, 2500) > 1000)
+  if(pulseIn(RCV, HIGH, 25000) > 10000)
   {
     Serial.println("Disparo");
     disparo();
@@ -171,6 +177,9 @@ void loop() {
     Serial.println("Modo calibracion");
     calibracion();
   }
-  
-  statusFlash();            //añade flashes de status. TAMBIEN INCLUYE LOS DELAY ENTRE BUCLES, NECESARIOS.
+ 
+  if((abs((millis()/1000))-globalTimer )>1){
+    statusFlash();            //añade flashes de status. TAMBIEN INCLUYE LOS DELAY ENTRE BUCLES, NECESARIOS.
+    globalTimer=abs(millis()/1000);
+  }
 }
