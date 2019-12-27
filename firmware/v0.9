@@ -14,6 +14,8 @@
 
 #define VER 0.9       // Version actual
 
+int minVal,maxVal,medVal  // variables utilizadas para calibrar la señal recibida para disparar
+
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;
 decode_results results;
@@ -33,7 +35,10 @@ void setup()
   Serial.print("Laser Dog Fight - ver:");
   Serial.print(VER);
   irrecv.enableIRIn(); // Empezamos la recepción  por IR
+
+  
 }
+
 
 
 unsigned long dump(decode_results *results) {
@@ -146,7 +151,52 @@ void calibracion(){
   }
   digitalWrite(LED_CALIBRACION,LOW);
   delay(200);
+
+  
 }
+
+void funcionCalibIni{
+  int minVal,maxVal, lastValue;
+  int n=0;
+  
+  lastValue=pulseIn(RCV, HIGH, 25000);
+  maxVal=lastValue;
+  minVal=lastValue;
+  asignarLimites(lastValue);
+ 
+ while(n>6){
+   lastValue= pulseIn(RCV, HIGH, 25000);  
+   if(lastValue>medVal){
+     while(lastValue>medVal){delay(100);}
+     n++;
+   }
+   asignarLimites();
+ }
+  
+    
+  
+
+}
+
+void asignarLimites(int lastValue){
+
+  if(lastValue> maxVal){
+    maxVal=lastValue;
+    Serial.print("Aumentado valor superior. Pulso: ");
+    Serial.println(maxVal);
+  }
+  else if( lastValue<minVal){
+    minVal=lastValue;
+    Serial.println("Disminuido valor inferior. Pulso:");
+    Serial.println(minVal);
+  }
+    
+  medVal=(minVal+maxVal) /2;
+   delay(100);
+    
+}
+
+
 
 void loop() {
   unsigned long data;
